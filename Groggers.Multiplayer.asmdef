@@ -1,0 +1,17 @@
+{
+    "name": "Groggers.Multiplayer",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ae759e267fd8e2045ab1ccc0e6375c55",
+        "GUID:68bd7fdb68ef2684e982e8a9825b18a5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

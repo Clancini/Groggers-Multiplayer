@@ -1,0 +1,169 @@
+using Groggers.Utils;
+using Steamworks;
+using System;
+
+namespace Groggers.Multiplayer.Steam
+{
+    internal sealed class ServerConnection
+    {
+        HSteamListenSocket _listenSocketP2P;
+        HSteamListenSocket _listenSocketIP;
+        HSteamNetPollGroup _pollGroup;
+
+        Callback<SteamNetConnectionStatusChangedCallback_t> _connectionStatusChanged;
+
+        PlayerSlot[] _playerSlots;
+
+        public ServerConnection(PlayerSlot[] playerSlots)
+        {
+            _playerSlots = playerSlots;
+
+            _connectionStatusChanged = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionStatusChanged);
+
+            _pollGroup = SteamNetworkingSockets.CreatePollGroup();
+        }
+
+        public void CreateSocketIdentity()
+        {
+            _listenSocketP2P = SteamNetworkingSockets.CreateListenSocketP2P(0, 0, null);
+
+            Logger.Info($"Created Steam identity listen socket");
+        }
+
+        public void CreateSocketIP()
+        {
+            SteamNetworkingIPAddr ipAddr = new SteamNetworkingIPAddr();
+            ipAddr.Clear();
+            ipAddr.m_port = MultiplayerSettings.IPPort;
+
+            _listenSocketIP = SteamNetworkingSockets.CreateListenSocketIP(ref ipAddr, 0, null);
+
+            Logger.Info($"Created Steam IP listen socket");
+        }
+
+        public HSteamNetConnection CreateLoopback()
+        {
+            SteamNetworkingIdentity server = new SteamNetworkingIdentity();
+            SteamNetworkingIdentity client = new SteamNetworkingIdentity();
+
+            SteamNetworkingSockets.CreateSocketPair(out HSteamNetConnection serverConnection, out HSteamNetConnection clientConnection, true, ref server, ref client);
+
+            OnConnectionConnected(serverConnection);
+
+            return clientConnection;
+        }
+
+        void OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t callback)
+        {
+            switch (callback.m_info.m_eState)
+            {
+                case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
+
+                    OnIncomingConnection(callback.m_hConn);
+
+                    break;
+
+                case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
+
+                    OnConnectionConnected(callback.m_hConn);
+
+                    break;
+
+                case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer:
+
+                    CloseConnection(callback.m_hConn);
+
+                    break;
+
+                case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
+
+                    CloseConnection(callback.m_hConn);
+
+                    break;
+            }
+        }
+
+        void OnIncomingConnection(HSteamNetConnection connection)
+        {
+            Logger.Info($"New connection is connecting... Connection: {connection}");
+
+            if (IndexOfFirstEmptySlot() == -1)
+            {
+                Logger.Info($"Connection rejected because there are not slots available. Connection: {connection}");
+
+                CloseConnection(connection);
+
+                return;
+            }
+
+            SteamNetworkingSockets.AcceptConnection(connection);
+
+            Logger.Info($"Accepted new connection. Connection: {connection}");
+        }
+
+        void OnConnectionConnected(HSteamNetConnection connection)
+        {
+            SteamNetworkingSockets.SetConnectionPollGroup(connection, _pollGroup);
+
+            int slotIndex = IndexOfFirstEmptySlot();
+            PlayerSlot newPlayerSlot = new PlayerSlot();
+            newPlayerSlot.SetConnection(connection);
+            _playerSlots[slotIndex] = newPlayerSlot;
+
+            Logger.Info($"New connection established. Slot: {slotIndex}, Connection: {connection}");
+        }
+
+        void CloseConnection(HSteamNetConnection connection)
+        {
+            SteamNetworkingSockets.CloseConnection(connection, 0, null, false);
+            SteamNetworkingSockets.SetConnectionPollGroup(connection, HSteamNetPollGroup.Invalid);
+
+            int slotIndex = IndexOfConnectionSlot(connection);
+            // We might just be cleaning up a connection that was rejected during connection, so there might not be a slot that contains it
+            if (slotIndex != -1)
+            {
+                _playerSlots[slotIndex].SetConnection(HSteamNetConnection.Invalid);
+            }
+
+            Logger.Info($"Connection closed. Slot: {slotIndex}, Connection: {connection}");
+        }
+
+        public void Dispose()
+        {
+            for (int i = 0; i < _playerSlots.Length; i++)
+            {
+                if (_playerSlots[i].Connection != HSteamNetConnection.Invalid)
+                {
+                    CloseConnection(_playerSlots[i].Connection);
+                }
+            }
+
+            SteamNetworkingSockets.CloseListenSocket(_listenSocketP2P);
+            SteamNetworkingSockets.CloseListenSocket(_listenSocketIP);
+
+            SteamNetworkingSockets.DestroyPollGroup(_pollGroup);
+
+            Logger.Info($"Closed Steam listen socket");
+        }
+
+        int IndexOfFirstEmptySlot()
+        {
+            for (int i = 0; i < _playerSlots.Length; i++)
+            {
+                if (_playerSlots[i].Connection == HSteamNetConnection.Invalid) return i;
+            }
+
+            return -1;
+        }
+
+        int IndexOfConnectionSlot(HSteamNetConnection connection)
+        {
+            for (int i = 0; i < _playerSlots.Length; i++)
+            {
+                if (_playerSlots[i].Connection == connection) return i;
+            }
+
+            return -1;
+        }
+    }
+}
