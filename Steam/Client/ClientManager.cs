@@ -55,6 +55,14 @@ namespace Groggers.Multiplayer.Steam
             _connection.ConnectIP(hostAddress);
         }
 
+        public void ConnectIdentity(CSteamID hostID)
+        {
+            SteamNetworkingIdentity hostIdentity = new SteamNetworkingIdentity();
+            hostIdentity.SetSteamID(hostID);
+
+            _connection.ConnectIdentity(hostIdentity);
+        }
+
         public void RegisterListener(int messageType, MessageListener listener)
         {
             _dispatcher.RegisterListener(messageType, listener);
