@@ -14,13 +14,12 @@ namespace Groggers.Multiplayer.Steam
 
         PlayerSlot[] _playerSlots;
 
-        public ServerConnection(PlayerSlot[] playerSlots)
+        public ServerConnection(HSteamNetPollGroup pollGroup, PlayerSlot[] playerSlots)
         {
+            _pollGroup = pollGroup;
             _playerSlots = playerSlots;
 
             _connectionStatusChanged = Callback<SteamNetConnectionStatusChangedCallback_t>.Create(OnConnectionStatusChanged);
-
-            _pollGroup = SteamNetworkingSockets.CreatePollGroup();
         }
 
         public void CreateSocketIdentity()
@@ -89,7 +88,7 @@ namespace Groggers.Multiplayer.Steam
         {
             Logger.Info($"New connection is connecting... Connection: {connection}");
 
-            if (IndexOfFirstEmptySlot() == -1)
+            if (ServerManager.IndexOfFirstEmptySlot(_playerSlots) == -1)
             {
                 Logger.Info($"Connection rejected because there are not slots available. Connection: {connection}");
 
@@ -107,7 +106,7 @@ namespace Groggers.Multiplayer.Steam
         {
             SteamNetworkingSockets.SetConnectionPollGroup(connection, _pollGroup);
 
-            int slotIndex = IndexOfFirstEmptySlot();
+            int slotIndex = ServerManager.IndexOfFirstEmptySlot(_playerSlots);
             PlayerSlot newPlayerSlot = new PlayerSlot();
             newPlayerSlot.SetConnection(connection);
             _playerSlots[slotIndex] = newPlayerSlot;
@@ -120,7 +119,7 @@ namespace Groggers.Multiplayer.Steam
             SteamNetworkingSockets.CloseConnection(connection, 0, null, false);
             SteamNetworkingSockets.SetConnectionPollGroup(connection, HSteamNetPollGroup.Invalid);
 
-            int slotIndex = IndexOfConnectionSlot(connection);
+            int slotIndex = ServerManager.IndexOfConnectionSlot(_playerSlots, connection);
             // We might just be cleaning up a connection that was rejected during connection, so there might not be a slot that contains it
             if (slotIndex != -1)
             {
@@ -143,29 +142,7 @@ namespace Groggers.Multiplayer.Steam
             SteamNetworkingSockets.CloseListenSocket(_listenSocketP2P);
             SteamNetworkingSockets.CloseListenSocket(_listenSocketIP);
 
-            SteamNetworkingSockets.DestroyPollGroup(_pollGroup);
-
             Logger.Info($"Closed Steam listen socket");
-        }
-
-        int IndexOfFirstEmptySlot()
-        {
-            for (int i = 0; i < _playerSlots.Length; i++)
-            {
-                if (_playerSlots[i].Connection == HSteamNetConnection.Invalid) return i;
-            }
-
-            return -1;
-        }
-
-        int IndexOfConnectionSlot(HSteamNetConnection connection)
-        {
-            for (int i = 0; i < _playerSlots.Length; i++)
-            {
-                if (_playerSlots[i].Connection == connection) return i;
-            }
-
-            return -1;
         }
     }
 }

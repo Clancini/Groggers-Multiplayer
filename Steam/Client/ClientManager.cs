@@ -73,9 +73,9 @@ namespace Groggers.Multiplayer.Steam
             _dispatcher.UnregisterListener(messageType, listener);
         }
 
-        public void QueueMessage<T>(int messageType, int target, Reliability reliability, in T message) where T : struct, IMessage
+        public void QueueMessage<T>(int messageType, Reliability reliability, in T message) where T : struct, IMessage
         {
-            _dispatcher.QueueMessage(messageType, target, reliability, in message);
+            _dispatcher.QueueMessage(messageType, reliability, in message);
         }
 
         public void Dispose()

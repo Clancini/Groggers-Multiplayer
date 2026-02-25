@@ -2,7 +2,7 @@ using System;
 
 namespace Groggers.Multiplayer
 {
-    public delegate Action MessageListener(in MessageReader message);
+    public delegate void MessageListener(in MessageReader message);
 
     public static class CommonValues
     {

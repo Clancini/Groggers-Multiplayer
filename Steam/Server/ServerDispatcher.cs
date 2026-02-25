@@ -5,10 +5,8 @@ using System.Collections.Generic;
 
 namespace Groggers.Multiplayer.Steam
 {
-    internal sealed class ClientDispatcher
+    internal sealed class ServerDispatcher
     {
-        HSteamNetConnection _currentConnection;
-
         IntPtr[] _receivedMessages;
 
         IntPtr[] _messagesToSend;
@@ -17,8 +15,14 @@ namespace Groggers.Multiplayer.Steam
 
         Dictionary<int, MessageListener> _listeners;
 
-        public ClientDispatcher()
+        HSteamNetPollGroup _pollGroup;
+        PlayerSlot[] _playerSlots;
+
+        public ServerDispatcher(HSteamNetPollGroup pollGroup, PlayerSlot[] playerSlots)
         {
+            _pollGroup = pollGroup;
+            _playerSlots = playerSlots;
+
             _receivedMessages = new IntPtr[MultiplayerSettings.ReceivedMessagesCapacity];
             _messagesToSend = new IntPtr[MultiplayerSettings.MessagesToSendCapacity];
             _messagesSendResults = new long[MultiplayerSettings.MessagesToSendCapacity];
@@ -26,17 +30,10 @@ namespace Groggers.Multiplayer.Steam
             _listeners = new Dictionary<int, MessageListener>();
         }
 
-        public void SetConnection(HSteamNetConnection connection)
-        {
-            _currentConnection = connection;
-        }
-
         public void Update()
         {
-            if (_currentConnection == HSteamNetConnection.Invalid) return;
+            PollConnections();
 
-            PollConnection();
-            
             if (_messagesToSendPosition > 0)
             {
                 SendMessages();
@@ -54,6 +51,8 @@ namespace Groggers.Multiplayer.Steam
             {
                 _listeners.Add(messageType, listener);
             }
+
+            Logger.Info($"Registered listener for message type {messageType}");
         }
 
         public void UnregisterListener(int messageType, MessageListener listener)
@@ -71,22 +70,26 @@ namespace Groggers.Multiplayer.Steam
         }
 
         #region Receiving
-        void PollConnection()
+        void PollConnections()
         {
-            int receivedCount = SteamNetworkingSockets.ReceiveMessagesOnConnection(_currentConnection, _receivedMessages, MultiplayerSettings.ReceivedMessagesCapacity);
+            int receivedCount = SteamNetworkingSockets.ReceiveMessagesOnPollGroup(_pollGroup, _receivedMessages, _receivedMessages.Length);
 
             while (receivedCount > 0)
             {
+                Logger.Info($"Received {receivedCount} messages. Starting processing...");
+
                 for (int i = 0; i < receivedCount; i++)
                 {
                     ProcessMessage(i);
                 }
 
-                receivedCount = SteamNetworkingSockets.ReceiveMessagesOnConnection(_currentConnection, _receivedMessages, MultiplayerSettings.ReceivedMessagesCapacity);
+                receivedCount = SteamNetworkingSockets.ReceiveMessagesOnPollGroup(_pollGroup, _receivedMessages, _receivedMessages.Length);
+
+                Logger.Info($"Finished. {receivedCount} more found");
             }
         }
 
-        unsafe void ProcessMessage(int messageIndex)
+        void ProcessMessage(int messageIndex)
         {
             IntPtr messageAtIndex = _receivedMessages[messageIndex];
 
@@ -107,10 +110,10 @@ namespace Groggers.Multiplayer.Steam
         #endregion
 
         #region Sending
-        public void QueueMessage<T>(int messageType, Reliability reliability, in T message) where T : struct, IMessage
+        public void QueueMessage<T>(int messageType, int target, Reliability reliability, in T message) where T : struct, IMessage
         {
-            // -1 as target because the client only has one connection, could have been any number
-            IntPtr newMessage = SteamUtils.CreateMessage(messageType, -1, reliability, in message, _currentConnection);
+            HSteamNetConnection targetConnection = _playerSlots[target].Connection;
+            IntPtr newMessage = SteamUtils.CreateMessage(messageType, target, reliability, in message, targetConnection);
 
             if (_messagesToSendPosition >= MultiplayerSettings.MessagesToSendCapacity)
             {
@@ -119,8 +122,6 @@ namespace Groggers.Multiplayer.Steam
 
             _messagesToSend[_messagesToSendPosition] = newMessage;
             _messagesToSendPosition++;
-
-            Logger.Info($"Queued message of type {messageType} for sending. Reliability: {reliability}. Current queue size: {_messagesToSendPosition}");
         }
 
         void SendMessages()
