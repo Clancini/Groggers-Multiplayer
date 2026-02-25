@@ -50,6 +50,8 @@ namespace Groggers.Multiplayer.Steam
 
             OnConnectionConnected(serverConnection);
 
+            Logger.Info($"Created loopback connection. Server connection: {serverConnection}, Client connection: {clientConnection}");
+
             return clientConnection;
         }
 

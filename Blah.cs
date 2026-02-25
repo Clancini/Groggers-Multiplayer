@@ -1,3 +1,4 @@
+using Groggers.Multiplayer;
 using Groggers.Multiplayer.Steam;
 using Unity.Multiplayer.PlayMode;
 using UnityEngine;
@@ -20,11 +21,14 @@ public class Blah : MonoBehaviour
         {
             ServerManager server = new ServerManager();
             server.Start();
+
+            ClientManager client = new ClientManager(ConnectionMode.Manual);
+            client.ConnectLoopback(server.CreateLoopback());
         }
         else
         {
-            ClientManager client = new ClientManager();
-            client.ConnectIP();
+            ClientManager client = new ClientManager(ConnectionMode.Manual);
+            client.ConnectIP("127.0.0.1");
         }
     }
 }

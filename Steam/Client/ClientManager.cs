@@ -9,13 +9,15 @@ namespace Groggers.Multiplayer.Steam
         readonly ClientConnection _connection;
         readonly ClientDispatcher _dispatcher;
 
-        public ClientManager()
+        public ClientManager(ConnectionMode mode)
         {
             _matchmaker = new ClientMatchmaker();
             _connection = new ClientConnection();
             _dispatcher = new ClientDispatcher();
 
-            _matchmaker.OnJoinedLobby += OnJoinedLobby;
+            if (mode == ConnectionMode.Auto)
+                _matchmaker.OnJoinedLobby += OnJoinedLobby;
+
             _connection.OnConnected += OnConnected;
         }
 
@@ -39,10 +41,15 @@ namespace Groggers.Multiplayer.Steam
             _dispatcher.Update();
         }
 
-        public void ConnectIP()
+        public void ConnectLoopback(HSteamNetConnection connection)
+        {
+            _connection.ConnectLoopback(connection);
+        }
+
+        public void ConnectIP(string ipAddress)
         {
             SteamNetworkingIPAddr hostAddress = new SteamNetworkingIPAddr();
-            hostAddress.ParseString("127.0.0.1");
+            hostAddress.ParseString(ipAddress);
             hostAddress.m_port = MultiplayerSettings.IPPort;
 
             _connection.ConnectIP(hostAddress);

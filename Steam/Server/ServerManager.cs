@@ -1,4 +1,6 @@
 
+using Steamworks;
+
 namespace Groggers.Multiplayer.Steam
 {
     public sealed class ServerManager
@@ -27,6 +29,11 @@ namespace Groggers.Multiplayer.Steam
         {
             _connection.CreateSocketIdentity();
             _connection.CreateSocketIP();
+        }
+
+        public HSteamNetConnection CreateLoopback()
+        {
+            return _connection.CreateLoopback();
         }
 
         public void Dispose()
