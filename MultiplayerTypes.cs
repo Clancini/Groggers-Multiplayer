@@ -6,7 +6,7 @@ namespace Groggers.Multiplayer
 
     public static class CommonValues
     {
-        public const int HeaderSize = sizeof(int) * 3;
+        public const int HeaderSize = sizeof(int);
     }
 
     public enum Reliability

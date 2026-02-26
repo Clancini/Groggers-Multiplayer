@@ -22,7 +22,7 @@ namespace Groggers.Multiplayer.Steam
             return k_nSteamNetworkingSend_ReliableNoDelay;
         }
 
-        public static IntPtr CreateMessage<T>(int messageType, int target, Reliability reliability, in T message, HSteamNetConnection connection) where T : struct, IMessage
+        public static IntPtr CreateMessage<T>(int messageType, Reliability reliability, in T message, HSteamNetConnection connection) where T : struct, IMessage
         {
             int messageSize = message.GetSize() + CommonValues.HeaderSize;
 
@@ -41,8 +41,6 @@ namespace Groggers.Multiplayer.Steam
                 MessageWriter writer = new MessageWriter(span);
 
                 writer.Write(messageType);
-                writer.Write(0);
-                writer.Write(target);
 
                 message.SerializeWith(ref writer);
             }

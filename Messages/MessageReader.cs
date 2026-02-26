@@ -8,14 +8,12 @@ namespace Groggers.Multiplayer
     public readonly ref struct MessageReader
     {
         public readonly int Type;
-        public readonly int Sender;
-        public readonly int Target;
 
         readonly ReadOnlySpan<byte> _backingBuffer;
 
         public MessageReader(ReadOnlySpan<byte> backingBuffer)
         {
-            _backingBuffer = CutMessageHeader(backingBuffer, out Type, out Sender, out Target);
+            _backingBuffer = CutMessageHeader(backingBuffer, out Type);
         }
 
         public T Read<T>(int position, out int newPosition) where T : unmanaged
@@ -44,7 +42,7 @@ namespace Groggers.Multiplayer
             return value;
         }
 
-        public static ReadOnlySpan<byte> CutMessageHeader(ReadOnlySpan<byte> messageData, out int type, out int sender, out int target)
+        public static ReadOnlySpan<byte> CutMessageHeader(ReadOnlySpan<byte> messageData, out int type)
         {
             int headerPosition;
 
@@ -52,11 +50,6 @@ namespace Groggers.Multiplayer
 
             type = MemoryMarshal.Read<int>(header);
             headerPosition = sizeof(int);
-
-            sender = MemoryMarshal.Read<int>(header.Slice(headerPosition));
-            headerPosition += sizeof(int);
-
-            target = MemoryMarshal.Read<int>(header.Slice(headerPosition));
 
             return messageData.Slice(CommonValues.HeaderSize);
         }

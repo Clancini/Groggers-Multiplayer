@@ -113,7 +113,7 @@ namespace Groggers.Multiplayer.Steam
         public void QueueMessage<T>(int messageType, int target, Reliability reliability, in T message) where T : struct, IMessage
         {
             HSteamNetConnection targetConnection = _playerSlots[target].Connection;
-            IntPtr newMessage = SteamUtils.CreateMessage(messageType, target, reliability, in message, targetConnection);
+            IntPtr newMessage = SteamUtils.CreateMessage(messageType, reliability, in message, targetConnection);
 
             if (_messagesToSendPosition >= MultiplayerSettings.MessagesToSendCapacity)
             {
