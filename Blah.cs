@@ -50,8 +50,9 @@ public class Blah : MonoBehaviour
             _server = new ServerManager();
             _server.Start();
 
-            _client = new ClientManager(ConnectionMode.Manual);
-            _client.ConnectLoopback(_server.CreateLoopback());
+            _client = new ClientManager(ConnectionMode.Auto);
+
+            ClientManager client2 = new ClientManager(ConnectionMode.Auto);
 
             _server.RegisterListener(0, OnMessageReceived);
             _client.RegisterListener(0, OnMessageReceived);
@@ -59,11 +60,11 @@ public class Blah : MonoBehaviour
             BlahMessage message = new BlahMessage(42);
             _client.QueueMessage(0, Reliability.Reliable, in message);
             _server.QueueMessage(0, 0, Reliability.Reliable, in message);
+
         }
         else
         {
-            _client = new ClientManager(ConnectionMode.Manual);
-            _client.ConnectIP("127.0.0.1");
+
         }
     }
 

@@ -43,7 +43,12 @@ namespace Groggers.Multiplayer.Steam
 
         void OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t callback)
         {
-            switch(callback.m_info.m_eState)
+            if (callback.m_hConn != _currentConnection)
+            {
+                return;
+            }
+
+            switch (callback.m_info.m_eState)
             {
                 case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
 

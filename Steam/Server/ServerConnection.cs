@@ -56,6 +56,9 @@ namespace Groggers.Multiplayer.Steam
 
         void OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t callback)
         {
+            if (callback.m_info.m_hListenSocket != _listenSocketP2P && callback.m_info.m_hListenSocket != _listenSocketIP)
+                return;
+
             switch (callback.m_info.m_eState)
             {
                 case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting:
