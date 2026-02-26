@@ -18,7 +18,7 @@ namespace Groggers.Multiplayer.Steam
             if (mode == ConnectionMode.Auto)
                 _matchmaker.OnJoinedLobby += OnJoinedLobby;
 
-            _connection.OnConnected += OnConnected;
+            _connection.OnConnectionChanged += OnConnected;
         }
 
         void OnJoinedLobby(CSteamID lobbyID)
@@ -81,7 +81,7 @@ namespace Groggers.Multiplayer.Steam
         public void Dispose()
         {
             _matchmaker.OnJoinedLobby -= OnJoinedLobby;
-            _connection.OnConnected -= OnConnected;
+            _connection.OnConnectionChanged -= OnConnected;
 
             _matchmaker.Dispose();
             _connection.Dispose();
