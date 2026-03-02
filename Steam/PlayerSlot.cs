@@ -1,3 +1,5 @@
+#if !DISABLESTEAMWORKS
+
 using Steamworks;
 
 namespace Groggers.Multiplayer.Steam
@@ -12,3 +14,5 @@ namespace Groggers.Multiplayer.Steam
         }
     }
 }
+
+#endif

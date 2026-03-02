@@ -1,3 +1,5 @@
+#if !DISABLESTEAMWORKS
+
 using Groggers.Utils;
 using Steamworks;
 using System;
@@ -78,3 +80,5 @@ namespace Groggers.Multiplayer.Steam
         }
     }
 }
+
+#endif

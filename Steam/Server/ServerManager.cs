@@ -1,3 +1,4 @@
+#if !DISABLESTEAMWORKS
 
 using Steamworks;
 
@@ -93,3 +94,5 @@ namespace Groggers.Multiplayer.Steam
         #endregion
     }
 }
+
+#endif
