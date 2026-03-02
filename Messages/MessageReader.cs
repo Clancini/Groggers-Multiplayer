@@ -44,12 +44,9 @@ namespace Groggers.Multiplayer
 
         public static ReadOnlySpan<byte> CutMessageHeader(ReadOnlySpan<byte> messageData, out int type)
         {
-            int headerPosition;
-
             ReadOnlySpan<byte> header = messageData.Slice(0, CommonValues.HeaderSize);
 
             type = MemoryMarshal.Read<int>(header);
-            headerPosition = sizeof(int);
 
             return messageData.Slice(CommonValues.HeaderSize);
         }
