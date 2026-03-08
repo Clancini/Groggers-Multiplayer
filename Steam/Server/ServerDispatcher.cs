@@ -54,7 +54,7 @@ namespace Groggers.Multiplayer.Steam
                 _listeners.Add(messageType, listener);
             }
 
-            Logger.Info($"Registered listener for message type {messageType}");
+            Log.Info($"Registered listener for message type {messageType}");
         }
 
         public void UnregisterListener(int messageType, MessageListener listener)
@@ -78,7 +78,7 @@ namespace Groggers.Multiplayer.Steam
 
             while (receivedCount > 0)
             {
-                Logger.Info($"Received {receivedCount} messages. Starting processing...");
+                Log.Info($"Received {receivedCount} messages. Starting processing...");
 
                 for (int i = 0; i < receivedCount; i++)
                 {
@@ -87,7 +87,7 @@ namespace Groggers.Multiplayer.Steam
 
                 receivedCount = SteamNetworkingSockets.ReceiveMessagesOnPollGroup(_pollGroup, _receivedMessages, _receivedMessages.Length);
 
-                Logger.Info($"Finished. {receivedCount} more found");
+                Log.Info($"Finished. {receivedCount} more found");
             }
         }
 

@@ -122,7 +122,7 @@ namespace Groggers.Multiplayer.Steam
             _messagesToSend[_messagesToSendPosition] = newMessage;
             _messagesToSendPosition++;
 
-            Logger.Info($"Queued message of type {messageType} for sending. Reliability: {reliability}. Current queue size: {_messagesToSendPosition}");
+            Log.Info($"Queued message of type {messageType} for sending. Reliability: {reliability}. Current queue size: {_messagesToSendPosition}");
         }
 
         void SendMessages()

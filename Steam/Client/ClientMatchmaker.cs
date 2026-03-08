@@ -26,13 +26,13 @@ namespace Groggers.Multiplayer.Steam
         {
             if (_isInLobby)
             {
-                Logger.Error("Can't join a new Steam lobby while already in one.");
+                Log.Error("Can't join a new Steam lobby while already in one.");
                 return;
             }
 
             SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
 
-            Logger.Info($"Trying to join the Steam lobby... ID: {callback.m_steamIDLobby}");
+            Log.Info($"Trying to join the Steam lobby... ID: {callback.m_steamIDLobby}");
         }
 
         void OnLobbyEntered(LobbyEnter_t callback)
@@ -46,13 +46,13 @@ namespace Groggers.Multiplayer.Steam
 
                     OnJoinedLobby?.Invoke(_currentLobbyID);
 
-                    Logger.Info($"Successfully joined the Steam lobby. ID: {callback.m_ulSteamIDLobby}");
+                    Log.Info($"Successfully joined the Steam lobby. ID: {callback.m_ulSteamIDLobby}");
 
                     break;
 
                 case (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
 
-                    Logger.Error($"Failed to join the Steam lobby. ID:  {callback.m_ulSteamIDLobby}");
+                    Log.Error($"Failed to join the Steam lobby. ID:  {callback.m_ulSteamIDLobby}");
 
                     break;
             }
@@ -66,7 +66,7 @@ namespace Groggers.Multiplayer.Steam
             _currentLobbyID = CSteamID.Nil;
             _isInLobby = false;
 
-            Logger.Info("Left the Steam lobby.");
+            Log.Info("Left the Steam lobby.");
         }
 
         public void Dispose()

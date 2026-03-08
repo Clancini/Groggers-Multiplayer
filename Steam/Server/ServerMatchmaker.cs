@@ -21,7 +21,7 @@ namespace Groggers.Multiplayer.Steam
         {
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, MultiplayerSettings.MaxPlayers);
 
-            Logger.Info("Creating lobby...");
+            Log.Info("Creating lobby...");
         }
 
         void OnLobbyCreationResult(LobbyCreated_t callback)
@@ -30,7 +30,7 @@ namespace Groggers.Multiplayer.Steam
             {
                 case EResult.k_EResultOK:
 
-                    Logger.Info($"Lobby created successfully. ID: {callback.m_ulSteamIDLobby}");
+                    Log.Info($"Lobby created successfully. ID: {callback.m_ulSteamIDLobby}");
 
                     OnLobbyCreated?.Invoke();
 
@@ -38,7 +38,7 @@ namespace Groggers.Multiplayer.Steam
 
                 default:
 
-                    Logger.Error($"Failed to create lobby. Result: {callback.m_eResult}");
+                    Log.Error($"Failed to create lobby. Result: {callback.m_eResult}");
                     
                     break;
             }

@@ -27,7 +27,7 @@ namespace Groggers.Multiplayer.Steam
         {
             _listenSocketP2P = SteamNetworkingSockets.CreateListenSocketP2P(0, 0, null);
 
-            Logger.Info($"Created Steam identity listen socket");
+            Log.Info($"Created Steam identity listen socket");
         }
 
         public void CreateSocketIP()
@@ -38,7 +38,7 @@ namespace Groggers.Multiplayer.Steam
 
             _listenSocketIP = SteamNetworkingSockets.CreateListenSocketIP(ref ipAddr, 0, null);
 
-            Logger.Info($"Created Steam IP listen socket");
+            Log.Info($"Created Steam IP listen socket");
         }
 
         public HSteamNetConnection CreateLoopback()
@@ -50,7 +50,7 @@ namespace Groggers.Multiplayer.Steam
 
             OnConnectionConnected(serverConnection);
 
-            Logger.Info($"Created loopback connection. Server connection: {serverConnection}, Client connection: {clientConnection}");
+            Log.Info($"Created loopback connection. Server connection: {serverConnection}, Client connection: {clientConnection}");
 
             return clientConnection;
         }
@@ -90,11 +90,11 @@ namespace Groggers.Multiplayer.Steam
 
         void OnIncomingConnection(HSteamNetConnection connection)
         {
-            Logger.Info($"New connection is connecting... Connection: {connection}");
+            Log.Info($"New connection is connecting... Connection: {connection}");
 
             if (ServerManager.IndexOfFirstEmptySlot(_playerSlots) == -1)
             {
-                Logger.Info($"Connection rejected because there are not slots available. Connection: {connection}");
+                Log.Info($"Connection rejected because there are not slots available. Connection: {connection}");
 
                 CloseConnection(connection);
 
@@ -103,7 +103,7 @@ namespace Groggers.Multiplayer.Steam
 
             SteamNetworkingSockets.AcceptConnection(connection);
 
-            Logger.Info($"Accepted new connection. Connection: {connection}");
+            Log.Info($"Accepted new connection. Connection: {connection}");
         }
 
         void OnConnectionConnected(HSteamNetConnection connection)
@@ -115,7 +115,7 @@ namespace Groggers.Multiplayer.Steam
             newPlayerSlot.SetConnection(connection);
             _playerSlots[slotIndex] = newPlayerSlot;
 
-            Logger.Info($"New connection established. Slot: {slotIndex}, Connection: {connection}");
+            Log.Info($"New connection established. Slot: {slotIndex}, Connection: {connection}");
         }
 
         void CloseConnection(HSteamNetConnection connection)
@@ -130,7 +130,7 @@ namespace Groggers.Multiplayer.Steam
                 _playerSlots[slotIndex].SetConnection(HSteamNetConnection.Invalid);
             }
 
-            Logger.Info($"Connection closed. Slot: {slotIndex}, Connection: {connection}");
+            Log.Info($"Connection closed. Slot: {slotIndex}, Connection: {connection}");
         }
 
         public void Dispose()
@@ -146,7 +146,7 @@ namespace Groggers.Multiplayer.Steam
             SteamNetworkingSockets.CloseListenSocket(_listenSocketP2P);
             SteamNetworkingSockets.CloseListenSocket(_listenSocketIP);
 
-            Logger.Info($"Closed Steam listen socket");
+            Log.Info($"Closed Steam listen sockets");
         }
     }
 }

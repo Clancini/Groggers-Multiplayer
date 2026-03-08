@@ -25,7 +25,7 @@ namespace Groggers.Multiplayer.Steam
 
             _currentConnection = SteamNetworkingSockets.ConnectP2P(ref hostIdentity, 0, 0, null);
 
-            Logger.Info($"Trying to connect to the host via Steam identity... Host ID: {hostIdentity.GetSteamID()}, Connection ID: {_currentConnection}");
+            Log.Info($"Trying to connect to the host via Steam identity... Host ID: {hostIdentity.GetSteamID()}, Connection ID: {_currentConnection}");
         }
 
         public void ConnectIP(SteamNetworkingIPAddr hostAddress)
@@ -34,7 +34,7 @@ namespace Groggers.Multiplayer.Steam
 
             _currentConnection = SteamNetworkingSockets.ConnectByIPAddress(ref hostAddress, 0, null);
 
-            Logger.Info($"Trying to connect to the host via Steam IP... Host IP: {hostAddress.GetIPv4()} : {hostAddress.m_port}, Connection ID: {_currentConnection}");
+            Log.Info($"Trying to connect to the host via Steam IP... Host IP: {hostAddress.GetIPv4()} : {hostAddress.m_port}, Connection ID: {_currentConnection}");
         }
 
         // For loopback
@@ -46,7 +46,7 @@ namespace Groggers.Multiplayer.Steam
 
             OnConnectionChanged?.Invoke(_currentConnection);
 
-            Logger.Info($"Connected to the host via loopback. Connection ID: {_currentConnection}");
+            Log.Info($"Connected to the host via loopback. Connection ID: {_currentConnection}");
         }
 
         void OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t callback)
@@ -59,7 +59,7 @@ namespace Groggers.Multiplayer.Steam
 
                     OnConnectionChanged?.Invoke(callback.m_hConn);
 
-                    Logger.Info($"Successfully connected to the host. Connection ID: {callback.m_hConn}");
+                    Log.Info($"Successfully connected to the host. Connection ID: {callback.m_hConn}");
 
                     break;
 
@@ -87,7 +87,7 @@ namespace Groggers.Multiplayer.Steam
 
             OnConnectionChanged?.Invoke(HSteamNetConnection.Invalid);
 
-            Logger.Info($"Disconnected from the host.");
+            Log.Info($"Disconnected from the host.");
         }
 
         public void Dispose()
