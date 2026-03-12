@@ -17,7 +17,9 @@ public class Blah : MonoBehaviour
         
         public BlahMessage(in MessageReader reader)
         {
-            Int = reader.Read<int>(0, out _);
+            int readPosition = 0;
+
+            Int = reader.Read<int>(ref readPosition);
         }
 
         public int GetSize()
@@ -27,7 +29,7 @@ public class Blah : MonoBehaviour
 
         public void SerializeWith(ref MessageWriter writer)
         {
-            writer.Write<int>(Int);
+            writer.Write(Int);
         }
     }
 

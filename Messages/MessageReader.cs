@@ -16,28 +16,26 @@ namespace Groggers.Multiplayer
             _backingBuffer = CutMessageHeader(backingBuffer, out Type);
         }
 
-        public T Read<T>(int position, out int newPosition) where T : unmanaged
+        public T Read<T>(ref int position) where T : unmanaged
         {
             int size = Unsafe.SizeOf<T>();
 
             ReadOnlySpan<byte> slice = _backingBuffer.Slice(position, size);
             T value = MemoryMarshal.Read<T>(slice);
 
-            newPosition = position + size;
+            position += size;
 
             return value;
         }
 
-        public string Read(int position, out int newPosition)
+        public string Read(ref int position)
         {
-            int length = Read<int>(position, out newPosition);
-
-            position = newPosition;
+            int length = Read<int>(ref position);
 
             ReadOnlySpan<byte> slice = _backingBuffer.Slice(position, length);
             string value = Encoding.UTF8.GetString(slice);
 
-            newPosition = position + length;
+            position += length;
 
             return value;
         }
