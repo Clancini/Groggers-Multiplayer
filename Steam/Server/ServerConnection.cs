@@ -120,15 +120,15 @@ namespace Groggers.Multiplayer.Steam
 
         void CloseConnection(HSteamNetConnection connection)
         {
-            SteamNetworkingSockets.CloseConnection(connection, 0, null, false);
-            SteamNetworkingSockets.SetConnectionPollGroup(connection, HSteamNetPollGroup.Invalid);
-
             int slotIndex = ServerManager.IndexOfConnectionSlot(_playerSlots, connection);
             // We might just be cleaning up a connection that was rejected during connection, so there might not be a slot that contains it
             if (slotIndex != -1)
             {
                 _playerSlots[slotIndex].SetConnection(HSteamNetConnection.Invalid);
             }
+
+            SteamNetworkingSockets.CloseConnection(connection, 0, null, false);
+            SteamNetworkingSockets.SetConnectionPollGroup(connection, HSteamNetPollGroup.Invalid);
 
             Log.Info($"Connection closed. Slot: {slotIndex}, Connection: {connection}");
         }

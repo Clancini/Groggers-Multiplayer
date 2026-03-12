@@ -14,7 +14,7 @@ public class Blah : MonoBehaviour
         {
             Int = i;
         }
-
+        
         public BlahMessage(in MessageReader reader)
         {
             Int = reader.Read<int>(0, out _);

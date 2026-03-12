@@ -36,9 +36,9 @@ namespace Groggers.Multiplayer.Steam
             _connection.CreateSocketIP();
         }
 
-        public HSteamNetConnection CreateLoopback()
+        public uint CreateLoopback()
         {
-            return _connection.CreateLoopback();
+            return _connection.CreateLoopback().m_HSteamNetConnection;
         }
 
         public void Update()

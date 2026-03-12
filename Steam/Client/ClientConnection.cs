@@ -38,11 +38,13 @@ namespace Groggers.Multiplayer.Steam
         }
 
         // For loopback
-        public void ConnectLoopback(HSteamNetConnection connection)
+        public void ConnectLoopback(uint connection)
         {
+            HSteamNetConnection steamConnection = new HSteamNetConnection(connection);
+
             CloseConnection();
 
-            _currentConnection = connection;
+            _currentConnection = steamConnection;
 
             OnConnectionChanged?.Invoke(_currentConnection);
 

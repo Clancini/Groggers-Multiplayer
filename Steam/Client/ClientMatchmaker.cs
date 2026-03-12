@@ -10,9 +10,11 @@ namespace Groggers.Multiplayer.Steam
     {
         Callback<GameLobbyJoinRequested_t> _lobbyJoinRequest;
         Callback<LobbyEnter_t> _lobbyEntered;
+        Callback<LobbyChatUpdate_t> _lobbyUpdate;
 
         CSteamID _currentLobbyID;
         bool _isInLobby;
+        bool _canLeaveLobby;    // If the player is hosting, we can't let the client object leave the lobby. The lobby is owned by the host for as long as the server exists
 
         public event Action<CSteamID> OnJoinedLobby;
 
@@ -20,6 +22,7 @@ namespace Groggers.Multiplayer.Steam
         {
             _lobbyJoinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnRequestToJoinLobby);
             _lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+            _lobbyUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyUpdate);
         }
 
         void OnRequestToJoinLobby(GameLobbyJoinRequested_t callback)
@@ -58,25 +61,49 @@ namespace Groggers.Multiplayer.Steam
             }
         }
 
-        public void LeaveLobby()
+        void OnLobbyUpdate(LobbyChatUpdate_t callback)
         {
-            if (!_isInLobby) return;
+            CSteamID user = new CSteamID(callback.m_ulSteamIDUserChanged);
 
-            SteamMatchmaking.LeaveLobby(_currentLobbyID);
+            if ((callback.m_rgfChatMemberStateChange & (uint)EChatMemberStateChange.k_EChatMemberStateChangeLeft) != 0)
+            {
+                if (user == SteamUser.GetSteamID())
+                {
+                    OnLeftLobby();
+                }
+            }
+        }
+
+        void OnLeftLobby()
+        {
             _currentLobbyID = CSteamID.Nil;
             _isInLobby = false;
 
             Log.Info("Left the Steam lobby.");
         }
 
+        public void SetCanLeaveLobby(bool value)
+        {
+            _canLeaveLobby = value;
+        }
+
+        public void LeaveLobby()
+        {
+            if (!_isInLobby) return;
+            if (_canLeaveLobby) Log.Warning("Can't leave lobby");
+
+            SteamMatchmaking.LeaveLobby(_currentLobbyID);
+        }
+
         public void Dispose()
         {
-            LeaveLobby();
+            if (_canLeaveLobby) LeaveLobby();
 
             OnJoinedLobby = null;
 
             _lobbyJoinRequest.Dispose();
             _lobbyEntered.Dispose();
+            _lobbyUpdate.Dispose();
         }
     }
 }

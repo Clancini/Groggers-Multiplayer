@@ -10,16 +10,29 @@ namespace Groggers.Multiplayer.Steam
         readonly ClientConnection _connection;
         readonly ClientDispatcher _dispatcher;
 
+        ConnectionMode _connectionMode;
+
         public ClientManager(ConnectionMode mode)
         {
             _matchmaker = new ClientMatchmaker();
             _connection = new ClientConnection();
             _dispatcher = new ClientDispatcher();
 
-            if (mode == ConnectionMode.Auto)
+            _connectionMode = mode;
+            if (_connectionMode == ConnectionMode.Auto)
                 _matchmaker.OnJoinedLobby += OnJoinedLobby;
 
             _connection.OnConnectionChanged += OnConnected;
+        }
+
+        public void SetConnectionMode(ConnectionMode mode)
+        {
+            if (mode == _connectionMode) return;
+
+            if (_connectionMode == ConnectionMode.Auto && mode == ConnectionMode.Manual)
+                _matchmaker.OnJoinedLobby -= OnJoinedLobby;
+            else if (_connectionMode == ConnectionMode.Manual && mode == ConnectionMode.Auto)
+                _matchmaker.OnJoinedLobby += OnJoinedLobby;
         }
 
         void OnJoinedLobby(CSteamID lobbyID)
@@ -42,7 +55,7 @@ namespace Groggers.Multiplayer.Steam
             _dispatcher.Update();
         }
 
-        public void ConnectLoopback(HSteamNetConnection connection)
+        public void ConnectLoopback(uint connection)
         {
             _connection.ConnectLoopback(connection);
         }
@@ -62,6 +75,21 @@ namespace Groggers.Multiplayer.Steam
             hostIdentity.SetSteamID(hostID);
 
             _connection.ConnectIdentity(hostIdentity);
+        }
+
+        public void CloseConnection()
+        {
+            _connection.CloseConnection();
+        }
+
+        public void SetCanLeaveLobby(bool value)
+        {
+            _matchmaker.SetCanLeaveLobby(value);
+        }
+
+        public void LeaveLobby()
+        {
+            _matchmaker.LeaveLobby();
         }
 
         public void RegisterListener(int messageType, MessageListener listener)
