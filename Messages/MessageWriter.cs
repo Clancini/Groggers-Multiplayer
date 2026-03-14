@@ -8,7 +8,9 @@ namespace Groggers.Multiplayer
     public ref struct MessageWriter
     {
         Span<byte> _backingBuffer;
+        
         int _position;
+        public int Position => _position;
 
         public MessageWriter(Span<byte> backingBuffer)
         {

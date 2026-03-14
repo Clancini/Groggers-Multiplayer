@@ -1,5 +1,3 @@
-using System;
-
 namespace Groggers.Multiplayer
 {
     public delegate void MessageListener(in MessageReader message);
